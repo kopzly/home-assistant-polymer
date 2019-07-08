@@ -114,3 +114,13 @@ gulp.task("copy-static-demo", (done) => {
   copyTranslations(paths.demo_static);
   done();
 });
+
+gulp.task("copy-static-cast", (done) => {
+  // Copy app static files
+  fs.copySync(polyPath("public"), paths.cast_root);
+
+  copyMapPanel(paths.cast_static);
+  copyFonts(paths.cast_static);
+  copyTranslations(paths.cast_static);
+  done();
+});

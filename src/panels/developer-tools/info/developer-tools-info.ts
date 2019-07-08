@@ -13,6 +13,7 @@ import { haStyle } from "../../../resources/styles";
 import "./system-log-card";
 import "./error-log-card";
 import "./system-health-card";
+import "./hass-cast";
 
 const JS_TYPE = __BUILD__;
 const JS_VERSION = __VERSION__;
@@ -42,6 +43,7 @@ class HaPanelDevInfo extends LitElement {
 
     return html`
       <div class="about">
+        <hass-cast .hass=${this.hass}></hass-cast>
         <p class="version">
           <a href="https://www.home-assistant.io" target="_blank"
             ><img
