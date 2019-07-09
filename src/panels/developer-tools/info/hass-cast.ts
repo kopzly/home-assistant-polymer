@@ -10,7 +10,7 @@ import {
 import { loadJS } from "../../../common/dom/load_resource";
 import "../../../components/ha-card";
 import { HomeAssistant } from "../../../types";
-import "../../../components/entity/ha-entity-picker";
+import { HassMessage } from "../../../data/js_cast";
 
 interface SessionStateChangedEvent {
   type: "sessionstatechanged";
@@ -40,13 +40,12 @@ class HassCast extends LitElement {
           ${this._connected
             ? html`
                 <div class="actions">
-                  <ha-entity-picker
-                    label="Entity to track"
-                    domain-filter="light"
-                    .hass=${this.hass}
-                  ></ha-entity-picker>
-                  <mwc-button @click=${this._trackEntity}>Track</mwc-button>
-                  <br /><br /><br />
+                  <mwc-button @click=${this._sendAuth}>Send Auth</mwc-button>
+                  <br /><br />
+                  <mwc-button @click=${this._showLovelace}
+                    >Send Lovelace</mwc-button
+                  >
+                  <br /><br />
                   <mwc-button @click=${this._breakFree}>Break Free</mwc-button>
                 </div>
               `
@@ -83,18 +82,21 @@ class HassCast extends LitElement {
       // @ts-ignore
       cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
       (ev: SessionStateChangedEvent) => {
-        if (ev.sessionState === "SESSION_STARTED") {
-          this._castSessionEstablished();
+        if (ev.sessionState === "SESSION_RESUMED") {
+          // TODO we should verify that it is actually connected
+          this._connected = true;
+        } else if (ev.sessionState === "SESSION_STARTED") {
+          this._sendAuth();
         }
       }
     );
   }
 
-  private _sendCastMessage(msg) {
+  private _sendCastMessage(msg: HassMessage) {
     this._castSession.sendMessage("urn:x-cast:com.nabucasa.hast", msg);
   }
 
-  private _castSessionEstablished() {
+  private _sendAuth() {
     this._sendCastMessage({
       type: "connect",
       refreshToken: this.hass.auth.data.refresh_token,
@@ -113,18 +115,112 @@ class HassCast extends LitElement {
     return this._castContext.getCurrentSession();
   }
 
-  private _trackEntity() {
-    const picker = this.shadowRoot!.querySelector("ha-entity-picker")!;
-
-    const entityId = picker.value;
-    if (!entityId) {
-      return;
-    }
+  private _showLovelace() {
     this._sendCastMessage({
-      type: "track_entity",
-      entityId,
+      type: "show_lovelace",
+      config: {
+        views: [
+          {
+            cards: [
+              {
+                title: "Home",
+                type: "entities",
+                entities: [
+                  "light.ceiling_lights",
+                  "light.bed_light",
+                  "light.kitchen_lights",
+                ],
+              },
+
+              {
+                type: "horizontal-stack",
+                cards: [],
+              },
+              {
+                type: "horizontal-stack",
+                cards: [
+                  {
+                    type: "sensor",
+                    entity: "sensor.inside_temperature",
+                  },
+                  {
+                    type: "sensor",
+                    entity: "sensor.inside_humidity",
+                  },
+                ],
+              },
+              {
+                type: "map",
+                aspect_ratio: "16:7.6",
+                // default_zoom: 15,
+                entities: [
+                  "device_tracker.paulus_demo",
+                  "device_tracker.at_demo",
+                  "zone.home",
+                ],
+              },
+
+              {
+                type: "horizontal-stack",
+                cards: [
+                  {
+                    type: "sensor",
+                    entity: "sensor.outside_temperature",
+                  },
+                  {
+                    type: "sensor",
+                    entity: "sensor.outside_humidity",
+                  },
+                ],
+              },
+              {
+                type: "picture",
+                image: "http://192.168.1.234:8123/local/next-screen.png",
+                tap_action: {
+                  action: "call-service",
+                  service: "cast_demo.show_lovelace",
+                  service_data: {
+                    config: {
+                      views: [
+                        {
+                          cards: [
+                            {
+                              entity: "media_player.office_display",
+                              type: "media-control",
+                            },
+                            {
+                              type: "picture-entity",
+                              entity: "camera.demo_camera",
+                            },
+                            {
+                              type: "thermostat",
+                              entity: "climate.hvac",
+                            },
+                            {
+                              type: "picture",
+                              image:
+                                "http://192.168.1.234:8123/local/next-screen.png",
+                              tap_action: {
+                                action: "call-service",
+                                service: "camera.play_stream",
+                                service_data: {
+                                  entity_id: "camera.g3",
+                                  media_player: "media_player.office_display",
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      },
     });
-    picker.value = "";
   }
 
   private _breakFree() {

@@ -192,7 +192,7 @@ const createDemoConfig = ({ isProdBuild, latestBuild, isStatsBuild }) => {
       new webpack.DefinePlugin({
         __DEV__: !isProdBuild,
         __BUILD__: JSON.stringify(latestBuild ? "latest" : "es5"),
-        __VERSION__: JSON.stringify("DEMO"),
+        __VERSION__: JSON.stringify(`DEMO-${version}`),
         __DEMO__: true,
         __STATIC_PATH__: "/static/",
         "process.env.NODE_ENV": JSON.stringify(
@@ -233,8 +233,8 @@ const createCastConfig = ({ isProdBuild }) => {
       new webpack.DefinePlugin({
         __DEV__: !isProdBuild,
         __BUILD__: JSON.stringify(latestBuild ? "latest" : "es5"),
-        __VERSION__: JSON.stringify("DEMO"),
-        __DEMO__: true,
+        __VERSION__: JSON.stringify(version),
+        __DEMO__: false,
         __STATIC_PATH__: "/static/",
         "process.env.NODE_ENV": JSON.stringify(
           isProdBuild ? "production" : "development"

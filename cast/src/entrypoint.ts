@@ -1,11 +1,11 @@
 import { castContext } from "./cast_context";
 import { HAST_NS } from "./const";
-import { ReceivedMessage, HassMessage } from "./types";
-import { ConnectionManager } from "./connection";
+import { ReceivedMessage } from "./types";
+import { HassMessage } from "../../src/data/js_cast";
+import { HcMain } from "./layout/hc-main";
 
-const manager = new ConnectionManager();
-
-(window as any).manager = manager;
+const controller = new HcMain();
+document.body.append(controller);
 
 const options = new cast.framework.CastReceiverOptions();
 options.disableIdleTimeout = true;
@@ -34,7 +34,7 @@ castContext.addCustomMessageListener(
   (ev: ReceivedMessage<HassMessage>) => {
     const msg = ev.data;
     msg.senderId = ev.senderId;
-    manager.processIncomingMessage(msg);
+    controller.processIncomingMessage(msg);
   }
 );
 
