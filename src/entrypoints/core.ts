@@ -17,10 +17,16 @@ import { HomeAssistant } from "../types";
 import { hassUrl } from "../data/auth";
 import { fetchConfig, WindowWithLovelaceProm } from "../data/lovelace";
 
+import { checkForGaplux, changeText } from "../GapLux/gaplux";
+
 declare global {
   interface Window {
     hassConnection: Promise<{ auth: Auth; conn: Connection }>;
   }
+}
+
+if (checkForGaplux()) {
+  changeText(document);
 }
 
 const isExternal = location.search.includes("external_auth=1");

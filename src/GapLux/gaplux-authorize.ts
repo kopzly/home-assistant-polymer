@@ -10,10 +10,6 @@ import {
 import "./ha-auth-flow";
 import { AuthProvider, fetchAuthProviders } from "../data/auth";
 import { registerServiceWorker } from "../util/register-service-worker";
-import { checkForGaplux, changeText } from "../GapLux/gaplux";
-if (checkForGaplux()) {
-  changeText(document);
-}
 
 import(/* webpackChunkName: "pick-auth-provider" */ "../auth/ha-pick-auth-provider");
 
@@ -80,7 +76,8 @@ class HaAuthorize extends litLocalizeLiteMixin(LitElement) {
     );
     loggingInWith.innerHTML = loggingInWith.innerHTML.replace(
       "**NAME**",
-      `<b>${this._authProvider!.name}</b>`
+      "<b>Lux-1</b>"
+      // `<b>${this._authProvider!.name}</b>`
     );
 
     const inactiveProviders = this._authProviders.filter(
@@ -88,20 +85,15 @@ class HaAuthorize extends litLocalizeLiteMixin(LitElement) {
     );
 
     return html`
-      ${checkForGaplux()
-        ? html`<p> Logg inn inn med brukernavn og passord for <b>${
-            location.hostname
-          }<b> </p>`
-        : html`
-            <p>
-              ${this.localize(
-                "ui.panel.page-authorize.authorizing_client",
-                "clientId",
-                this.clientId
-              )}
-            </p>
-            ${loggingInWith}
-          `}
+      <!-- <p>
+        ${this.localize(
+        "ui.panel.page-authorize.authorizing_client",
+        "clientId",
+        this.clientId
+      )}
+      </p> -->
+
+      <p>${loggingInWith}</p>
 
       <ha-auth-flow
         .resources="${this.resources}"
